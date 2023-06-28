@@ -1,19 +1,16 @@
 <template>
-  <div>
-    <data-table></data-table>
-  </div>
+    <div class="container">
+        <data-table></data-table>
+    </div>
 </template>
 
 <script>
-import { onMounted } from 'vue';
-import DataTable from './components/DataTable.vue';
-import axios from 'axios';
+import DataTable from "./components/DataTable.vue";
 
 export default {
-  components: {
-    DataTable,
-  },
-  setup() {
-  },
+    components: {
+        DataTable,
+    },
+    setup() {},
 };
 </script>
