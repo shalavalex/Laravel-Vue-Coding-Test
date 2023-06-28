@@ -9,7 +9,7 @@ class GitRepoApiController extends Controller
 {
     public function index(Request $request)
     {
-        $perPage = $request->input('perPage', 10);
+        $perPage = $request->input('perPage', 5);
         $sortBy = $request->input('sortBy', 'name');
         $sortOrder = $request->input('sortOrder', 'asc');
         $searchTerm = $request->input('search', '');

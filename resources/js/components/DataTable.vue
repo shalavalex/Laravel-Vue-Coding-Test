@@ -1,13 +1,27 @@
 <template>
     <div class="card">
-        <form @submit.prevent="searchRepositories">
-            <input
-                v-model="searchTerm"
-                type="text"
-                placeholder="Search repository by name"
-            />
-            <button type="submit">Search</button>
-        </form>
+        <div class="card flex justify-content-center searchCard">
+            <form
+                @submit.prevent="onSubmit"
+                class="flex flex-row gap-2 searchForm"
+            >
+                <span class="p-float-label">
+                    <InputText
+                        id="value"
+                        v-model="value"
+                        type="text"
+                        :class="{ 'p-invalid': errorMessage }"
+                        aria-describedby="text-error"
+                    />
+                    <label for="value">Name</label>
+                </span>
+                <small class="p-error" id="text-error">{{
+                    errorMessage || "&nbsp;"
+                }}</small>
+                <Button type="submit" label="Search repository by name" />
+            </form>
+            <Toast />
+        </div>
 
         <DataTable
             :value="repositories"
@@ -42,19 +56,34 @@
 import { ref, onMounted } from "vue";
 import DataTable from "primevue/datatable";
 import Column from "primevue/column";
+import InputText from "primevue/inputtext";
+import Button from "primevue/button";
+import { useField, useForm } from "vee-validate";
 import GitRepoService from "../services/GitRepoService";
 
 export default {
     components: {
         DataTable,
         Column,
+        InputText,
+        Button,
     },
     setup() {
+        const { handleSubmit, resetForm } = useForm();
+        const { value, errorMessage } = useField("value", validateField);
+
         const repositories = ref([]);
         const perPage = ref(10);
         const totalRecords = ref(0);
-        const searchTerm = ref("");
         const loading = ref(false);
+
+        function validateField(value) {
+            if (!value) {
+                return " ";
+            }
+
+            return true;
+        }
 
         const loadRepositories = async () => {
             loading.value = true;
@@ -68,7 +97,7 @@ export default {
                 perPage: perPage.value,
                 sortBy: event.sortField,
                 sortOrder: event.sortOrder,
-                search: searchTerm.value,
+                search: value.value,
             });
             repositories.value = data.repositories;
             totalRecords.value = data.totalRecords;
@@ -81,12 +110,19 @@ export default {
                 perPage: perPage.value,
                 sortBy: null,
                 sortOrder: null,
-                search: searchTerm.value,
+                search: value.value,
             });
             repositories.value = data.repositories;
             totalRecords.value = data.totalRecords;
             loading.value = false;
         };
+
+        const onSubmit = handleSubmit((values) => {
+            if (values.value && values.value.length > 0) {
+                searchRepositories();
+                resetForm();
+            }
+        });
 
         onMounted(loadRepositories);
 
@@ -94,10 +130,11 @@ export default {
             repositories,
             perPage,
             totalRecords,
-            searchTerm,
+            errorMessage,
             loading,
+            value,
             loadRepositories,
-            searchRepositories,
+            onSubmit,
         };
     },
 };
