@@ -11,12 +11,13 @@ class GitRepoApiController extends Controller
     {
         $perPage = $request->input('perPage', 5);
         $sortBy = $request->input('sortBy', 'name');
-        $sortOrder = $request->input('sortOrder', 'asc');
+        $sortOrder = $request->input('sortOrder', "1");
+        $sortOrder = ($sortOrder === '1') ? 'asc' : 'desc';
         $searchTerm = $request->input('search', '');
 
         $response = Http::get('https://api.github.com/search/repositories', [
             'q' => 'topic:php',
-            'per_page' => 100,
+            'per_page' => 500,
         ]);
 
         $repositories = collect($response->json()['items'])->map(function ($item) {

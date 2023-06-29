@@ -7,10 +7,10 @@ export default {
         const response = await axios.get(`${baseUrl}`, {
             params: {
                 page: params.page,
-                per_page: params.perPage,
-                sort: params.sortBy,
-                order: params.sortOrder,
-                q: params.search,
+                perPage: params.perPage,
+                sortBy: params.sortBy,
+                sortOrder: params.sortOrder,
+                search: params.search,
             },
         });
         return response.data;

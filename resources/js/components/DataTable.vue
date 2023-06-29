@@ -25,12 +25,16 @@
 
         <DataTable
             :value="repositories"
+            :sortField="sortField"
+            :sortOrder="sortOrder"
             :paginator="true"
             :rows="perPage"
             :totalRecords="totalRecords"
             :lazy="true"
             :loading="loading"
-            @onLazyLoad="loadRepositories"
+            tableStyle="min-width: 50rem"
+            @page="onPageChange"
+            @sort="onSort"
         >
             <Column field="id" header="ID"></Column>
             <Column field="name" header="Name" :sortable="true"></Column>
@@ -73,48 +77,48 @@ export default {
         const { value, errorMessage } = useField("value", validateField);
 
         const repositories = ref([]);
-        const perPage = ref(10);
+        const perPage = ref(5);
         const totalRecords = ref(0);
         const loading = ref(false);
+        const sortField = ref("name");
+        const sortOrder = ref(1);
 
         function validateField(value) {
             if (!value) {
                 return " ";
             }
-
             return true;
         }
 
-        const loadRepositories = async () => {
-            loading.value = true;
-            const event = {
-                first: (repositories.value.length - 1) * perPage.value,
-                sortField: null,
-                sortOrder: null,
-            };
-            const data = await GitRepoService.getRepositories({
-                page: event.first / perPage.value + 1,
-                perPage: perPage.value,
-                sortBy: event.sortField,
-                sortOrder: event.sortOrder,
-                search: value.value,
-            });
-            repositories.value = data.repositories;
-            totalRecords.value = data.totalRecords;
-            loading.value = false;
+        const fetchData = async (page, searchValue, sortBy, sortOrder) => {
+            try {
+                loading.value = true;
+                const data = await GitRepoService.getRepositories({
+                    page,
+                    perPage: perPage.value,
+                    sortBy,
+                    sortOrder,
+                    search: searchValue,
+                });
+                repositories.value = data.repositories;
+                totalRecords.value = data.totalRecords;
+            } catch (error) {
+                console.error(error);
+            } finally {
+                loading.value = false;
+            }
         };
+
+        const onPageChange = (event) => {
+            const { first, rows } = event;
+            const page = Math.ceil(first / rows) + 1;
+            fetchData(page, value.value, sortField.value, sortOrder.value);
+        };
+
         const searchRepositories = async () => {
-            loading.value = true;
-            let data = await GitRepoService.getRepositories({
-                page: 1,
-                perPage: perPage.value,
-                sortBy: null,
-                sortOrder: null,
-                search: value.value,
-            });
-            repositories.value = data.repositories;
-            totalRecords.value = data.totalRecords;
-            loading.value = false;
+            if (value.value && value.value.length > 0) {
+                fetchData(1, value.value, sortField.value, sortOrder.value);
+            }
         };
 
         const onSubmit = handleSubmit((values) => {
@@ -124,7 +128,13 @@ export default {
             }
         });
 
-        onMounted(loadRepositories);
+        const onSort = (event) => {
+            sortField.value = event.sortField;
+            sortOrder.value = event.sortOrder;
+            fetchData(1, value.value, sortField.value, sortOrder.value);
+        };
+
+        onMounted(() => fetchData(1, null));
 
         return {
             repositories,
@@ -133,8 +143,11 @@ export default {
             errorMessage,
             loading,
             value,
-            loadRepositories,
+            sortField,
+            sortOrder,
+            onPageChange,
             onSubmit,
+            onSort,
         };
     },
 };
