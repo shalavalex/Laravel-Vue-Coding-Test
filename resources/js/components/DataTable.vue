@@ -80,8 +80,8 @@ export default {
         const perPage = ref(5);
         const totalRecords = ref(0);
         const loading = ref(false);
-        const sortField = ref("name");
-        const sortOrder = ref(1);
+        const sortField = ref(null);
+        const sortOrder = ref(null);
 
         function validateField(value) {
             if (!value) {
