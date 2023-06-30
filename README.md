@@ -34,3 +34,7 @@ npm run dev
 
 Open [http://localhost:8000](http://localhost:8000) to view it in your browser.
 
+
+
+![image](https://github.com/prettyfairoza/laravel_vue_test/assets/119447423/ce766a36-8d8e-4311-a464-53372c72d600)
+
