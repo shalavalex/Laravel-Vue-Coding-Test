@@ -1,6 +1,4 @@
 
-# Fairoza Amira
-
 Laravel v9(PHP 8.0) + Vue3 
 
 ### Run Laravel backend
